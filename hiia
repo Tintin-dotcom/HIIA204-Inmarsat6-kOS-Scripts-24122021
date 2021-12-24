@@ -1,0 +1,119 @@
+clearscreen.
+wait 4.
+stage.
+set runmode to "Liftoff".
+set tarlon to 90.
+set tes1 to "n".
+set thrval to 0.
+set tval to 0.
+
+until runmode = "Done" {
+	if runmode = "Liftoff" {
+		set thrval to thrval + 0.003.
+		lock tval to thrval.
+		if tval >= 1 {
+			wait 0.5.
+			stage.
+			set runmode to "Ascent".
+		}
+	}
+	if runmode = "Ascent" {
+		if ship:periapsis > 70000 {
+			lock tval to 0.
+			set runmode to "Coastphase1".
+		}
+		turn(90).
+		
+		if ship:stagedeltav(ship:stagenum):current < 25 {
+			wait 2.
+			stage.
+		}
+	}
+	
+	else if runmode = "Coastphase1" {
+		if ship:longitude < tarlon + 0.1 and ship:longitude > tarlon - 0.1 {
+			set ship:control:fore to 1.
+			wait 1.
+			lock tval to 1.
+			wait 1.
+			set ship:control:fore to 0.
+			set runmode to "transfer".
+		}
+	}
+	
+	else if runmode = "transfer" {
+		if ship:apoapsis > 2854000 {
+			lock tval to 0.
+			wait 5.
+			stage.
+			wait 7.
+			toggle ag1.
+			wait 2.
+			toggle ag2.
+			wait 6.
+			toggle ag3.
+			toggle ag4.
+			set runmode to "Coastphase2".
+		}
+	}
+	
+	else if runmode = "Coastphase2" {
+		if eta:apoapsis < 300 {
+			stage.
+			lock tval to 1.
+			set runmode to "Circularization".
+		}
+	}
+	
+	else if runmode = "Circularization" {
+		if ship:orbit:period > 21598 {
+			lock tval to 0.
+			unlock steering.
+			set runmode to "Done".
+		}
+		else if ship:orbit:period > 21000 {
+			lock tval to 0.1.
+		}
+		
+	}
+	
+	lock throttle to tval.
+	printVesselStats().
+}
+sas on.
+
+function printVesselStats {
+	clearscreen.
+	print "Telemetry:" at(1, 4).
+	print "Altitude above sea level: " + round(ship:altitude) + "m" at(10, 5).
+	print "Current apoapsis: " + round(ship:apoapsis) + "m" at (10, 6).
+	print "Current periapsis: " + round(ship:periapsis) + "m" at (10, 7).
+	print "Orbital velocity: " + round(ship:velocity:orbit:mag * 3.6) + "km/h" at(10, 9).
+	print "Ship longitude: " + round(ship:longitude) + "º" at (10, 10).
+}
+
+function turn {
+	parameter heading.
+	if alt:radar < 1000 {
+		lock angle to 90.
+		lock steering to heading(heading, angle).
+	}
+  if alt:radar > 24000 and alt:radar < 36000{
+		lock angle to 	90 - 1.03 * alt:radar^.4.
+		lock steering to heading(heading, angle).
+	}
+	if alt:radar > 59000 {
+		lock angle to 0.
+		lock steering to heading(heading, angle).
+	}
+	if alt:radar > 36000 and alt:radar < 59000 {
+		lock angle to 15.
+		lock steering to heading(heading, angle).
+	}
+	
+	if alt:radar > 1000 and alt:radar < 24000 {
+		lock angle to 107 - 1.03287 * alt:radar^.4.
+		lock steering to heading(heading, angle).
+	}
+}
+
