@@ -2,7 +2,7 @@
 
 Craft files for the rocket, and a version without the parts needed for kOS, are included.
 
-Link to Youtube video:
+Link to Youtube video: https://youtu.be/xKUwVdqhGCU
 
 
 This is the Kerbal Operating System code for a japanese H-IIA 204 rocket launch, carrying the Inmarsat 6 communications satellite to GEO.
